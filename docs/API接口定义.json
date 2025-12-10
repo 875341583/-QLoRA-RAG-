@@ -1,0 +1,846 @@
+
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "多模态导航系统API",
+        "description": "支持多模态输入的智能导航系统API，提供图片、文本和视频流导航功能。",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://api.navigation-system.com/v1",
+            "description": "主服务地址"
+        }
+    ],
+    "tags": [
+        {
+            "name": "MultimodalInput",
+            "description": "多模态输入处理相关操作。"
+        },
+        {
+            "name": "ModelManagement",
+            "description": "QLoRA模型管理相关操作。"
+        },
+        {
+            "name": "KnowledgeBase",
+            "description": "RAG知识库管理相关操作。"
+        },
+        {
+            "name": "RealTimeNavigation",
+            "description": "实时视频流导航相关操作。"
+        },
+        {
+            "name": "DynamicPath",
+            "description": "动态路径更新相关操作。"
+        },
+        {
+            "name": "ResourceManagement",
+            "description": "成本优化与资源调度相关操作。"
+        },
+        {
+            "name": "Security",
+            "description": "安全管理与权限控制相关操作。"
+        },
+        {
+            "name": "DataAnalysis",
+            "description": "数据统计与分析报表相关操作。"
+        }
+    ],
+    "paths": {
+        "/multimodal/input/image": {
+            "post": {
+                "tags": [
+                    "MultimodalInput"
+                ],
+                "summary": "上传图片进行导航分析。",
+                "operationId": "handleImageUpload",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "description": "JWT认证令牌。",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "imageFile": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "userId": {
+                                        "type": "integer",
+                                        "format": "int64"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "图片导航分析成功。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NavigationResult"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "图片格式不支持或参数错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/multimodal/input/text": {
+            "post": {
+                "tags": [
+                    "MultimodalInput"
+                ],
+                "summary": "处理文本导航请求。",
+                "operationId": "processTextDescription",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "description": "JWT认证令牌。",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "userId": {
+                                        "type": "integer",
+                                        "format": "int64"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "文本导航分析成功。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NavigationResult"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "文本内容为空或参数错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/multimodal/input/video": {
+            "post": {
+                "tags": [
+                    "MultimodalInput"
+                ],
+                "summary": "启动实时视频流导航。",
+                "operationId": "startVideoStreamNavigation",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "description": "JWT认证令牌。",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "videoStreamUrl": {
+                                        "type": "string"
+                                    },
+                                    "userId": {
+                                        "type": "integer",
+                                        "format": "int64"
+                                    },
+                                    "deviceInfo": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "视频流导航会话创建成功。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VideoSessionResult"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "视频流URL无效或参数错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/model/training": {
+            "post": {
+                "tags": [
+                    "ModelManagement"
+                ],
+                "summary": "启动QLoRA模型微调训练。",
+                "operationId": "startModelFineTuning",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "description": "JWT认证令牌（需管理员权限）。",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "trainingData": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "parameters": {
+                                        "$ref": "#/components/schemas/TrainingParameters"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "模型训练任务启动成功。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TrainingTaskResult"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "训练数据不足或参数错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "权限不足。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/model/training/{taskId}": {
+            "get": {
+                "tags": [
+                    "ModelManagement"
+                ],
+                "summary": "查询模型训练进度。",
+                "operationId": "queryTrainingProgress",
+                "parameters": [
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true,
+                        "description": "训练任务ID。",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "description": "JWT认证令牌。",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "训练进度查询成功。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TrainingProgress"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "未找到指定的训练任务。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/knowledge/update": {
+            "post": {
+                "tags": [
+                    "KnowledgeBase"
+                ],
+                "summary": "触发知识库更新。",
+                "operationId": "triggerKnowledgeUpdate",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "description": "JWT认证令牌（需管理员权限）。",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mediaFile": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "updateType": {
+                                        "type": "string",
+                                        "enum": [
+                                            "IMAGE",
+                                            "VIDEO",
+                                            "TEXT"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "知识库更新任务启动成功。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/KnowledgeUpdateResult"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "媒体文件格式不支持或参数错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "权限不足。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/navigation/realtime": {
+            "post": {
+                "tags": [
+                    "RealTimeNavigation"
+                ],
+                "summary": "建立实时视频流导航连接。",
+                "operationId": "establishVideoConnection",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "description": "JWT认证令牌。",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "userId": {
+                                        "type": "integer",
+                                        "format": "int64"
+                                    },
+                                    "deviceInfo": {
+                                        "type": "string"
+                                    },
+                                    "videoSource": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "实时导航会话建立成功。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RealTimeSession"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "设备信息或视频源无效。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Security"
+                ],
+                "summary": "用户登录认证。",
+                "operationId": "userLoginAuthentication",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "username": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "登录认证成功。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResult"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "用户名或密码错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "NavigationResult": {
+                "type": "object",
+                "properties": {
+                    "sessionId": {
+                        "type": "string"
+                    },
+                    "currentLocation": {
+                        "type": "string"
+                    },
+                    "targetLocation": {
+                        "type": "string"
+                    },
+                    "pathPoints": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "x": {
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "type": "number"
+                                },
+                                "z": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    },
+                    "distanceEstimate": {
+                        "type": "number"
+                    },
+                    "estimatedTime": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "VideoSessionResult": {
+                "type": "object",
+                "properties": {
+                    "sessionId": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "CREATED",
+                            "PROCESSING",
+                            "ACTIVE"
+                        ]
+                    },
+                    "estimatedLatency": {
+                        "type": "number"
+                    }
+                }
+            },
+            "TrainingTaskResult": {
+                "type": "object",
+                "properties": {
+                    "taskId": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "STARTED",
+                            "RUNNING",
+                            "COMPLETED",
+                            "FAILED"
+                        ]
+                    },
+                    "estimatedCompletionTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "TrainingProgress": {
+                "type": "object",
+                "properties": {
+                    "taskId": {
+                        "type": "string"
+                    },
+                    "progressPercentage": {
+                        "type": "number"
+                    },
+                    "currentAccuracy": {
+                        "type": "number"
+                    },
+                    "estimatedRemainingTime": {
+                        "type": "string"
+                    }
+                }
+            },
+            "KnowledgeUpdateResult": {
+                "type": "object",
+                "properties": {
+                    "updateId": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "INITIATED",
+                            "EXTRACTING",
+                            "INDEXING",
+                            "COMPLETED"
+                        ]
+                    },
+                    "estimatedCompletionTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "RealTimeSession": {
+                "type": "object",
+                "properties": {
+                    "sessionId": {
+                        "type": "string"
+                    },
+                    "connectionStatus": {
+                        "type": "string",
+                        "enum": [
+                            "CONNECTED",
+                            "STREAMING",
+                            "DISCONNECTED"
+                        ]
+                    },
+                    "arOverlayUrl": {
+                        "type": "string"
+                    }
+                }
+            },
+            "AuthResult": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "expiresIn": {
+                        "type": "integer"
+                    },
+                    "userRole": {
+                        "type": "string"
+                    }
+                }
+            },
+            "TrainingParameters": {
+                "type": "object",
+                "properties": {
+                    "learningRate": {
+                        "type": "number"
+                    },
+                    "batchSize": {
+                        "type": "integer"
+                    },
+                    "epochs": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,154 @@
+# Spring Boot 启动配置文件
+# 配置Spring Cloud配置中心、服务注册信息、环境变量覆盖规则等
+
+spring:
+  application:
+    # 应用名称 - 用于服务注册和发现
+    name: navigation-system
+    
+  cloud:
+    config:
+      # 配置中心相关设置
+      uri: ${CONFIG_SERVER_URI:http://localhost:8888}  # 配置中心服务器地址，支持环境变量
+      fail-fast: true            # 启动时如果无法连接到配置中心则快速失败
+      retry:
+        initial-interval: 1000   # 重试初始间隔(毫秒)
+        max-attempts: 6          # 最大重试次数
+        max-interval: 2000       # 最大重试间隔(毫秒)
+        multiplier: 1.1          # 重试间隔乘数
+      enabled: ${SPRING_CLOUD_CONFIG_ENABLED:true}  # 支持动态启用/禁用配置中心
+    
+    # 服务发现配置（可选功能）
+    discovery:
+      enabled: ${SERVICE_DISCOVERY_ENABLED:false}  # 默认禁用服务发现
+      register: ${SERVICE_DISCOVERY_REGISTER:false}  # 默认不注册到服务发现服务器
+    
+    # 负载均衡配置
+    loadbalancer:
+      retry:
+        enabled: true            # 启用重试机制
+        
+  # 配置文件激活设置
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}  # 支持环境变量设置激活环境
+    # 移除不存在的配置文件引用，改为在application.yml中具体配置
+    
+  # 日志配置
+  logging:
+    config: classpath:logback-spring.xml  # 日志配置文件路径
+    level:
+      com.navigation: ${LOG_LEVEL_NAVIGATION:DEBUG}  # 支持环境变量设置日志级别
+      org.springframework.security: INFO  # Spring Security日志级别为INFO
+      org.springframework.cloud.config: WARN  # 减少配置中心客户端日志噪音
+    
+  # 启动配置
+  main:
+    allow-bean-definition-overriding: true  # 允许Bean定义覆盖
+    banner-mode: console         # 控制台显示启动横幅
+    
+  # 生命周期配置
+  lifecycle:
+    timeout-per-shutdown-phase: 30s  # 关闭阶段超时时间
+
+# 自定义配置项
+navigation:
+  system:
+    version: 1.0.0               # 系统版本号
+    description: "智能导航系统"    # 系统描述
+    
+  # 模型配置
+  model:
+    base-path: ${MODEL_BASE_PATH:/opt/models}  # 模型文件基础路径，支持环境变量
+    cache-size: 1000             # 模型缓存大小
+    
+  # 知识库配置
+  knowledge-base:
+    sync-interval: ${KNOWLEDGE_SYNC_INTERVAL:300}  # 同步间隔(秒)，支持环境变量
+    backup-enabled: true         # 启用备份功能
+    
+  # 性能配置
+  performance:
+    max-concurrent-sessions: ${MAX_CONCURRENT_SESSIONS:200}  # 最大并发会话数
+    response-timeout: ${RESPONSE_TIMEOUT:800}  # 响应超时时间(毫秒)
+
+# 监控和管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus  # 暴露的监控端点
+      base-path: /manage         # 管理端点基础路径，增强安全性
+    health:
+      show-details: when_authorized  # 健康检查详情显示策略
+      # 添加自定义健康检查组
+      group:
+        custom:
+          include: diskSpace,db,redis
+  
+  # 指标导出配置
+  metrics:
+    export:
+      prometheus:
+        enabled: true            # 启用Prometheus指标导出
+        step: 1m                 # 指标收集步长
+    # 添加自定义指标标签
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.profiles.active}
+        
+  # 跟踪配置
+  tracing:
+    sampling:
+      probability: 0.1           # 采样概率
+
+# 服务注册与发现配置（注释掉未使用的配置，提供示例）
+#eureka:
+#  client:
+#    enabled: false  # 默认禁用，需要时通过环境变量启用
+#    service-url:
+#      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+#    registry-fetch-interval-seconds: 5
+#  instance:
+#    prefer-ip-address: true
+#    lease-renewal-interval-in-seconds: 10
+#    lease-expiration-duration-in-seconds: 30
+
+# 配置中心客户端配置（优化配置）
+config:
+  client:
+    health:
+      enabled: true              # 启用配置中心健康检查
+    # 配置中心认证信息（通过环境变量配置更安全）
+    # username: ${CONFIG_SERVER_USERNAME:}
+    # password: ${CONFIG_SERVER_PASSWORD:}
+
+# 应用特定配置
+server:
+  port: ${SERVER_PORT:8080}      # 服务器端口，支持环境变量
+  servlet:
+    context-path: /api           # API基础路径
+
+# 环境特定的配置占位符（将在application-{profile}.yml中具体实现）
+---
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  # 开发环境特定配置将在application-dev.yml中定义
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "test"
+  # 测试环境特定配置将在application-test.yml中定义
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+  # 生产环境特定配置将在application-prod.yml中定义
+
+
+# 内容由AI生成，仅供参考

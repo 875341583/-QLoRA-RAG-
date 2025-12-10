@@ -1,0 +1,298 @@
+# Spring Boot Application Configuration
+spring:
+  application:
+    # Application name
+    name: navigation-system
+    
+  # Data source configuration - PostgreSQL
+  datasource:
+    # Database connection URL, using environment variables or default values
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/navigation_db}
+    # Database username, using environment variables or default values
+    username: ${DATABASE_USERNAME:postgres}
+    # Database password, using environment variables or default values
+    password: ${DATABASE_PASSWORD:}
+    # Database driver class name
+    driver-class-name: org.postgresql.Driver
+    
+  # JPA configuration
+  jpa:
+    # Database dialect, using PostgreSQL dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    # Whether to show SQL statements in console (enabled in development)
+    show-sql: ${SHOW_SQL:false}
+    # DDL generation strategy: validate, update, create, create-drop
+    hibernate:
+      ddl-auto: validate
+    # Database connection pool configuration
+    properties:
+      hibernate:
+        # Format SQL statements
+        format_sql: true
+        # Connection pool initial size
+        connection.pool_size: 5
+        # Connection pool maximum size
+        connection.pool_max_size: 20
+        
+  # Redis cache configuration
+  redis:
+    # Redis server host, using environment variables or default values
+    host: ${REDIS_HOST:localhost}
+    # Redis server port, using environment variables or default values
+    port: ${REDIS_PORT:6379}
+    # Redis database index
+    database: 0
+    # Connection timeout (milliseconds)
+    timeout: 3000
+    # Connection pool configuration
+    lettuce:
+      pool:
+        # Maximum active connections
+        max-active: 8
+        # Maximum idle connections
+        max-idle: 8
+        # Minimum idle connections
+        min-idle: 0
+        # Maximum wait time (milliseconds)
+        max-wait: -1ms
+        
+  # Security configuration
+  security:
+    # JWT token configuration
+    jwt:
+      # Secret key, MUST be set via environment variable in production
+      secret: ${JWT_SECRET:default-dev-secret-change-in-production}
+      # Token expiration time (hours)
+      expiration-hours: 24
+      
+  # File upload configuration
+  servlet:
+    multipart:
+      # Maximum file size per upload
+      max-file-size: 100MB
+      # Maximum request size
+      max-request-size: 200MB
+
+# Server configuration
+server:
+  # Service port, using environment variables or default values
+  port: ${SERVER_PORT:8080}
+  # Service context path
+  servlet:
+    context-path: /api
+  # Compression configuration
+  compression:
+    enabled: true
+    # Supported MIME types
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    # Minimum response size (bytes)
+    min-response-size: 2048
+
+# MyBatis-Plus configuration
+mybatis-plus:
+  # Global configuration
+  global-config:
+    db-config:
+      # Primary key type: AUTO, INPUT, ID_WORKER
+      id-type: auto
+      # Logical delete field name
+      logic-delete-field: deleted
+      # Logical delete value
+      logic-delete-value: 1
+      # Logical not-delete value
+      logic-not-delete-value: 0
+  # Mapper file locations
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # Entity class scan package path
+  type-aliases-package: com.navigation.domain.entity
+
+# vLLM inference engine configuration
+vllm:
+  # Model path, using environment variables or default values
+  model-path: ${VLLM_MODEL_PATH:/models/qwen-vl}
+  # Concurrent threads count
+  concurrent-threads: 4
+  # GPU memory allocation strategy
+  gpu-memory-allocation: auto
+  # Inference timeout (seconds)
+  inference-timeout: 30
+
+# FAISS vector index configuration
+faiss:
+  # Index type: IVF, Flat, HNSW, etc.
+  index-type: IVF
+  # Vector dimension size
+  dimension-size: 768
+  # Similarity algorithm: L2, IP, etc.
+  similarity-algorithm: L2
+  # Index construction parameters
+  nlist: 100
+  # Search parameters
+  nprobe: 10
+
+# Business related configurations
+navigation:
+  # Real-time navigation configuration
+  realtime:
+    # Maximum concurrent sessions
+    max-concurrent-sessions: 200
+    # Response latency threshold (milliseconds)
+    response-latency-threshold: 800
+    # Power saving mode battery threshold (percentage)
+    power-saving-threshold: 20
+    
+  # Dynamic path update configuration
+  dynamic-path:
+    # Path update timeout (minutes)
+    update-timeout-minutes: 10
+    # Supported media formats
+    supported-media-formats: JPEG,PNG,MP4
+    
+  # Cost optimization configuration
+  cost-optimization:
+    # Monthly cost limit (RMB)
+    monthly-cost-limit: 300
+    # GPU usage alert threshold (percentage)
+    gpu-usage-alert-threshold: 85
+    # Resource monitoring interval (seconds)
+    monitoring-interval: 60
+    
+  # QLoRA model training configuration
+  qlora:
+    # Training sample size
+    training-sample-size: 5000
+    # Target accuracy threshold
+    target-accuracy-threshold: 0.935
+    # Model version retention count
+    version-retention-count: 5
+
+# Logging configuration
+logging:
+  # Log level configuration
+  level:
+    # Root log level
+    root: INFO
+    # Project package log level
+    com.navigation: DEBUG
+    # SQL log level
+    org.hibernate.SQL: DEBUG
+    # MyBatis log level
+    com.baomidou.mybatisplus: INFO
+  # Log file configuration
+  file:
+    # Log file path
+    path: ./logs
+    # Log file name
+    name: navigation.log
+  # Log pattern configuration
+  pattern:
+    # Console log pattern
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    # File log pattern
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Spring Boot Actuator configuration (monitoring endpoints)
+management:
+  endpoints:
+    web:
+      exposure:
+        # Exposed monitoring endpoints
+        include: health,info,metrics,prometheus
+    # Endpoint enablement configuration
+    enabled-by-default: true
+  # Endpoint base path configuration
+  endpoint:
+    health:
+      # Health check details display
+      show-details: always
+      # Health check groups
+      show-components: always
+    # Prometheus metrics configuration
+    prometheus:
+      enabled: true
+
+# Prometheus monitoring configuration
+prometheus:
+  # Metrics scraping interval
+  scrape-interval: 15s
+  # Metrics path
+  metrics-path: /actuator/prometheus
+
+# Environment specific configurations (activated via spring.profiles.active)
+---
+# Development environment configuration
+spring:
+  config:
+    activate:
+      on-profile: dev
+  # Development environment database configuration
+  datasource:
+    url: ${DEV_DATABASE_URL:jdbc:postgresql://localhost:5432/navigation_dev}
+    username: ${DEV_DATABASE_USERNAME:postgres}
+    password: ${DEV_DATABASE_PASSWORD:}
+  # Development environment JPA configuration
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+  # Development environment logging level
+logging:
+  level:
+    com.navigation: DEBUG
+    org.hibernate.SQL: DEBUG
+
+---
+# Test environment configuration
+spring:
+  config:
+    activate:
+      on-profile: test
+  # Test environment database configuration
+  datasource:
+    url: ${TEST_DATABASE_URL:jdbc:postgresql://test-db:5432/navigation_test}
+    username: ${TEST_DATABASE_USERNAME:postgres}
+    password: ${TEST_DATABASE_PASSWORD:}
+  # Test environment Redis configuration
+  redis:
+    host: ${TEST_REDIS_HOST:test-redis}
+    port: ${TEST_REDIS_PORT:6379}
+  # Test environment JPA configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  # Test environment logging level
+logging:
+  level:
+    com.navigation: INFO
+
+---
+# Production environment configuration
+spring:
+  config:
+    activate:
+      on-profile: prod
+  # Production environment database configuration (MUST be set via environment variables)
+  datasource:
+    url: ${PROD_DATABASE_URL:REQUIRED-PROD_DATABASE_URL-NOT-SET}
+    username: ${PROD_DATABASE_USERNAME:REQUIRED-PROD_DATABASE_USERNAME-NOT-SET}
+    password: ${PROD_DATABASE_PASSWORD:REQUIRED-PROD_DATABASE_PASSWORD-NOT-SET}
+  # Production environment Redis configuration
+  redis:
+    host: ${PROD_REDIS_HOST:REQUIRED-PROD_REDIS_HOST-NOT-SET}
+    port: ${PROD_REDIS_PORT:6379}
+  # Production environment security configuration
+  security:
+    jwt:
+      secret: ${PROD_JWT_SECRET:REQUIRED-PROD_JWT_SECRET-NOT-SET}
+  # Production environment JPA configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  # Production environment logging level
+logging:
+  level:
+    com.navigation: INFO
+    org.hibernate.SQL: WARN
+
+
+# 内容由AI生成，仅供参考
